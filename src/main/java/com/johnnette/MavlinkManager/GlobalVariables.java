@@ -1,13 +1,11 @@
-package com.johnnette.gcs.MavlinkManager;
+package com.johnnette.MavlinkManager;
 
-import android.content.SharedPreferences;
-import android.util.Log;
-
-import com.johnnette.gcs.dao.ConnectionEntity;
 
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.johnnette.savedConnection.Device;
+//import io.dronefleet.mavlink.common.MavType;
 import io.dronefleet.mavlink.minimal.MavType;
 
 public class GlobalVariables {
@@ -43,7 +41,7 @@ public class GlobalVariables {
 
 
     // ref for ConnectionData class
-    public static ConnectionEntity DATA;
+    public static Device DATA;
 
 
 
@@ -58,7 +56,7 @@ public class GlobalVariables {
     public static boolean IS_ARM ;
     public static boolean IS_GUIDED;
     public static final AtomicBoolean CONNECTION_EXIST = new AtomicBoolean(false) ;
-    public static MavType DRONE_TYPE;
+    public static io.dronefleet.mavlink.minimal.MavType DRONE_TYPE;
     public static int BATTERY_CELLS ;
     public static int WP_RADIUS = 50;
 

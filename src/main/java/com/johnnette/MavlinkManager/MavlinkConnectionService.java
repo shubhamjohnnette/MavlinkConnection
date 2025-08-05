@@ -1,44 +1,45 @@
-package com.johnnette.gcs.MavlinkManager;
-import android.app.Service;
-import android.content.Intent;
-import android.os.IBinder;
-import android.util.Log;
+package com.johnnette.MavlinkManager;
 
-import androidx.annotation.Nullable;
+import Connection.ConnectionManager;
 
-import com.johnnette.gcs.connections.ConnectionManager;
+public class MavlinkConnectionService {
 
-public class MavlinkConnectionService extends Service {
-    private static final String TAG = "MavlinkConnectionService";
     private Thread connectionThread;
+    private volatile boolean running = false;
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void start() {
+        if (running) {
+            System.out.println("Service already running.");
+            return;
+        }
+
+        running = true;
         connectionThread = new Thread(() -> {
             try {
                 ConnectionManager connectionManager = new ConnectionManager();
-                connectionManager.autoConnect(getApplicationContext());
-                Log.d(TAG, "MAVLink AutoConnect successful.");
+                connectionManager.autoConnect();  // No context in core Java
+                System.out.println("MAVLink AutoConnect successful.");
             } catch (Exception e) {
-                Log.e(TAG, "AutoConnect failed", e);
+                System.err.println("AutoConnect failed: " + e.getMessage());
+                e.printStackTrace();
             }
         });
-        connectionThread.start();
 
-        return START_STICKY; // Keeps service running
+        connectionThread.start();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void stop() {
+        running = false;
         if (connectionThread != null && connectionThread.isAlive()) {
             connectionThread.interrupt();
+            System.out.println("Service stopped.");
         }
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null; // not a bound service
+    public boolean isRunning() {
+        return running && connectionThread != null && connectionThread.isAlive();
     }
 }
+
+
+

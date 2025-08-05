@@ -1,9 +1,6 @@
-package com.johnnette.gcs.connections;
+package Connection;
 
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.util.Log;
-
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,17 +12,14 @@ import io.dronefleet.mavlink.MavlinkConnection;
 import io.dronefleet.mavlink.MavlinkMessage;
 
 public class TCP implements MavlinkClient {
-    private static final String TAG = "TCPConnection";
     private static final int CONNECTION_TIMEOUT = 2000;
 
     private Socket socket;
     private MavlinkConnection mavlinkConnection;
     private InputStream inputStream;
     private OutputStream outputStream;
-    private HandlerThread readThread;
-    private Handler readHandler;
+    private Thread readThread;
     private volatile boolean isReading = false;
-
 
     @Override
     public void connect(String host, int port) throws Exception {
@@ -40,9 +34,9 @@ public class TCP implements MavlinkClient {
                 outputStream = socket.getOutputStream();
                 mavlinkConnection = MavlinkConnection.create(inputStream, outputStream);
 
-                Log.d(TAG, "Connected to " + host + ":" + port);
+                System.out.println("✅ Connected to " + host + ":" + port);
 
-                startReading(); // 🔄 Start background read loop
+                startReading(); // Start background read loop
 
             } else {
                 throw new IOException("Connection failed: Socket not connected");
@@ -52,55 +46,52 @@ public class TCP implements MavlinkClient {
             throw new IOException("Connection error: " + e.getMessage(), e);
         }
     }
+
     private void startReading() {
         if (readThread != null) return;
 
         isReading = true;
-        readThread = new HandlerThread("TCP-Mavlink-Reader");
-        readThread.start();
-        readHandler = new Handler(readThread.getLooper());
-
-        readHandler.post(() -> {
+        readThread = new Thread(() -> {
             while (isReading && !Thread.currentThread().isInterrupted()) {
                 try {
-                    Object message = mavlinkConnection.next();
+                    MavlinkMessage<?> message = mavlinkConnection.next();
                     if (message != null) {
-                        Log.d(TAG, "Received MAVLink message: " +  ((MavlinkMessage<?>) message).getPayload().toString());
-                        // You may post this to an event bus, listener, or LiveData here
-                        ((MavlinkMessage<?>) message).getPayload().toString();
+                        System.out.println("📥 Received MAVLink message: " + message.getPayload().toString());
+                        // Optionally, you could call a listener or queue here
                     }
                 } catch (IOException e) {
                     if (isReading) {
-                        Log.e(TAG, "MAVLink read error: " + e.getMessage(), e);
+                        System.err.println("❌ MAVLink read error: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 }
             }
-        });
-    }
+        }, "TCP-Mavlink-Reader");
 
+        readThread.start();
+    }
 
     @Override
     public void disconnect() {
         isReading = false;
 
-        if (readThread != null) {
-            readThread.quitSafely();
+        if (readThread != null && readThread.isAlive()) {
+            readThread.interrupt();
             try {
                 readThread.join();
             } catch (InterruptedException e) {
-                Log.e(TAG, "HandlerThread shutdown interrupted", e);
+                System.err.println("⚠️ Read thread shutdown interrupted: " + e.getMessage());
             }
             readThread = null;
-            readHandler = null;
         }
 
         try {
             if (inputStream != null) inputStream.close();
             if (outputStream != null) outputStream.close();
             if (socket != null && !socket.isClosed()) socket.close();
-            Log.d(TAG, "Disconnected");
+            System.out.println("🔌 Disconnected");
         } catch (IOException e) {
-            Log.e(TAG, "Error during disconnect: " + e.getMessage());
+            System.err.println("❌ Error during disconnect: " + e.getMessage());
         } finally {
             socket = null;
             mavlinkConnection = null;
@@ -108,7 +99,6 @@ public class TCP implements MavlinkClient {
             outputStream = null;
         }
     }
-
 
     @Override
     public void sendData(byte[] data) throws Exception {
@@ -119,14 +109,23 @@ public class TCP implements MavlinkClient {
         try {
             outputStream.write(data);
             outputStream.flush();
-            Log.v(TAG, "Sent " + data.length + " bytes");
+            System.out.println("📤 Sent " + data.length + " bytes");
         } catch (IOException e) {
             throw new IOException("Send error: " + e.getMessage(), e);
         }
     }
 
-    // Optional: Mavlink-specific interface if needed
     public MavlinkConnection getMavlinkConnection() {
-        return mavlinkConnection;
+        try {
+            InputStream bufferedIn = new BufferedInputStream(socket.getInputStream());
+            OutputStream out = socket.getOutputStream();
+            return MavlinkConnection.create(bufferedIn, out);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
+
 }
+
+

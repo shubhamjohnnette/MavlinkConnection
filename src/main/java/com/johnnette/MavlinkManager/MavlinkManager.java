@@ -1,14 +1,6 @@
-package com.johnnette.gcs.MavlinkManager;
+package com.johnnette.MavlinkManager;
 
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
-import android.util.Log;
 
-import androidx.annotation.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +23,7 @@ public  class MavlinkManager {
     private static MavlinkConnection mavlinkConnection;
     private ExecutorService executorService;
     private final List<MavlinkMessageListener> listeners = new ArrayList<>();
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+//    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private volatile boolean reading = false;
 
@@ -72,19 +64,19 @@ public  class MavlinkManager {
 
     private void startReading() {
         reading = true;
-        executorService.submit(() -> {
-            try {
-                while (reading && mavlinkConnection != null) {
-                    MavlinkMessage message = mavlinkConnection.next();
-                    if (message != null) {
-                        // Post to main thread for UI update
-                        mainHandler.post(() -> notifyListeners(message));
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error reading MAVLink messages", e);
-            }
-        });
+//        executorService.submit(() -> {
+//            try {
+//                while (reading && mavlinkConnection != null) {
+//                    MavlinkMessage message = mavlinkConnection.next();
+//                    if (message != null) {
+//                        // Post to main thread for UI update
+//                        mainHandler.post(() -> notifyListeners(message));
+//                    }
+//                }
+//            } catch (Exception e) {
+//                Log.e(TAG, "Error reading MAVLink messages", e);
+//            }
+//        });
     }
 
     private void notifyListeners(MavlinkMessage message) {
@@ -100,13 +92,16 @@ public  class MavlinkManager {
     // Send MAVLink command through current connection
     public synchronized void sendCommand(int systemId, int componentId, Object command) {
         if (mavlinkConnection != null) {
-            try {
+            try { System.out.println( "Cannot send message. No active MAVLink connection.");
+
                 mavlinkConnection.send1(systemId, componentId, command);
             } catch (IOException e) {
-                Log.e(TAG, "Failed to send MAVLink message", e);
+                System.out.println( "Cannot send message. No active MAVLink connection.");
+//                Log.e(TAG, "Failed to send MAVLink message", e);
             }
         } else {
-            Log.w(TAG, "Cannot send message. No active MAVLink connection.");
+            System.out.println( "Cannot send message. No active MAVLink connection.");
+//            Log.w(TAG, "Cannot send message. No active MAVLink connection.");
         }
     }
 
@@ -126,7 +121,7 @@ public  class MavlinkManager {
     }
     private static void SendMavlinkCommands(int systemId, int componentId, Object command) throws IOException {
 
-//        if ( mavlinkConnection!= null && GlobalVariables.CONNECTION_EXIST.get())//commandTrigger.set(true);
+        if ( mavlinkConnection!= null && GlobalVariables.CONNECTION_EXIST.get())//commandTrigger.set(true);
             mavlinkConnection.send1(systemId, componentId, command);
 
     }
@@ -177,7 +172,8 @@ public  class MavlinkManager {
                     try {
                         MavlinkManager.SendMavlinkCommands(GlobalVariables.SYSTEM_ID, GlobalVariables.COMPONENT_ID, object);
                     } catch (IOException e) {
-                        Log.e("MAVLINK", "ERROR IN SENDING COMMAND!!");
+                        System.out.println("MAVLINK"+ "ERROR IN SENDING COMMAND!!");
+//                        Log.e("MAVLINK", "ERROR IN SENDING COMMAND!!");
                     }
 
                 }
@@ -188,7 +184,8 @@ public  class MavlinkManager {
             try {
                 MavlinkManager.SendMavlinkCommands(GlobalVariables.SYSTEM_ID, GlobalVariables.COMPONENT_ID, object);
             } catch (IOException e) {
-                Log.e("MAVLINK", "ERROR IN SENDING COMMAND!!");
+                System.out.println("MAVLINK"+ "ERROR IN SENDING COMMAND!!");
+//                Log.e("MAVLINK", "ERROR IN SENDING COMMAND!!");
             }
 
         }
@@ -205,12 +202,12 @@ public  class MavlinkManager {
 //    }
 
 
-//    /**
-//     * Function for fetching the waypoints
-//     *
-//     * @param context : list of Waypoint and MissionItemInt
-//     * @param missionTaskListener    : to notify the function about the status of this function
-//     */
+////    /**
+////     * Function for fetching the waypoints
+////     *
+////     * @param context : list of Waypoint and MissionItemInt
+////     * @param missionTaskListener    : to notify the function about the status of this function
+////     */
 //    public static void ReadMission(Context context, MissionTaskListener missionTaskListener) {
 //
 //        MissionBuilder downloadedItemsList = new MissionBuilder();

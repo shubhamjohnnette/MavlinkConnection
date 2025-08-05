@@ -1,8 +1,4 @@
-package com.johnnette.gcs.connections;
-
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.util.Log;
+package Connection;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,20 +17,17 @@ import io.dronefleet.mavlink.MavlinkConnection;
 import io.dronefleet.mavlink.MavlinkMessage;
 
 public class UDP implements MavlinkClient {
-    private static final String TAG = "UDPConnection";
     private static final int BUFFER_SIZE = 1024;
     private static final int LOCAL_PORT = 14550;
 
     private DatagramSocket socket;
-    private HandlerThread handlerThread;
-    private Handler handler;
-
     private InetAddress remoteAddress;
     private int remotePort;
     private boolean isConnected = false;
     private boolean isRunning = false;
 
     private MavlinkConnection mavlinkConnection;
+    private Thread receiverThread;
     private Thread mavlinkReaderThread;
     private final ExecutorService sendExecutor = Executors.newSingleThreadExecutor();
 
@@ -45,15 +38,13 @@ public class UDP implements MavlinkClient {
         try {
             pipedOutputStream.connect(pipedInputStream);
         } catch (IOException e) {
-            Log.e(TAG, "Failed to connect pipes", e);
+            System.err.println("Failed to connect pipes: " + e.getMessage());
         }
     }
 
     @Override
     public void connect(String host, int port) throws Exception {
-        if (isConnected) {
-            disconnect();
-        }
+        if (isConnected) disconnect();
 
         try {
             remoteAddress = InetAddress.getByName(host);
@@ -63,7 +54,7 @@ public class UDP implements MavlinkClient {
             socket.setSoTimeout(3000);
             isConnected = true;
 
-            Log.d(TAG, "UDP connected to " + host + ":" + port + " on local port " + LOCAL_PORT);
+            System.out.println("UDP connected to " + host + ":" + port + " on local port " + LOCAL_PORT);
 
             startReceiver();
             initializeMavlink();
@@ -81,10 +72,9 @@ public class UDP implements MavlinkClient {
         isConnected = false;
         isRunning = false;
 
-        if (handlerThread != null) {
-            handlerThread.quitSafely();
-            handlerThread = null;
-            handler = null;
+        if (receiverThread != null && receiverThread.isAlive()) {
+            receiverThread.interrupt();
+            receiverThread = null;
         }
 
         if (mavlinkReaderThread != null && mavlinkReaderThread.isAlive()) {
@@ -98,22 +88,20 @@ public class UDP implements MavlinkClient {
             socket.close();
         }
 
-        Log.d(TAG, "UDP disconnected");
+        System.out.println("UDP disconnected");
     }
 
     @Override
     public void sendData(byte[] data) throws Exception {
-        if (!isConnected) {
-            throw new IOException("Not connected");
-        }
+        if (!isConnected) throw new IOException("Not connected");
 
         sendExecutor.submit(() -> {
             try {
                 DatagramPacket packet = new DatagramPacket(data, data.length, remoteAddress, remotePort);
                 socket.send(packet);
-                Log.v(TAG, "Sent " + data.length + " bytes to " + remoteAddress.getHostAddress());
+                System.out.println("Sent " + data.length + " bytes to " + remoteAddress.getHostAddress());
             } catch (IOException e) {
-                Log.e(TAG, "Send error: " + e.getMessage(), e);
+                System.err.println("Send error: " + e.getMessage());
             }
         });
     }
@@ -121,16 +109,11 @@ public class UDP implements MavlinkClient {
     private void startReceiver() {
         if (isRunning) return;
 
-        handlerThread = new HandlerThread("UDP-Receiver-Thread");
-        handlerThread.start();
-        handler = new Handler(handlerThread.getLooper());
-
         isRunning = true;
-
-        handler.post(() -> {
+        receiverThread = new Thread(() -> {
             byte[] buffer = new byte[BUFFER_SIZE];
 
-            while (isRunning) {
+            while (isRunning && !Thread.currentThread().isInterrupted()) {
                 try {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet);
@@ -138,21 +121,21 @@ public class UDP implements MavlinkClient {
                     if (!packet.getAddress().equals(remoteAddress) || packet.getPort() != remotePort) {
                         remoteAddress = packet.getAddress();
                         remotePort = packet.getPort();
-                        Log.d(TAG, "Remote updated: " + remoteAddress.getHostAddress() + ":" + remotePort);
+                        System.out.println("Remote updated: " + remoteAddress.getHostAddress() + ":" + remotePort);
                     }
 
                     byte[] received = new byte[packet.getLength()];
                     System.arraycopy(buffer, 0, received, 0, packet.getLength());
 
                     processReceivedData(received);
-
                 } catch (IOException e) {
                     if (isRunning) {
-                        Log.e(TAG, "UDP receive error: " + e.getMessage(), e);
+                        System.err.println("UDP receive error: " + e.getMessage());
                     }
                 }
             }
-        });
+        }, "UDP-Receiver");
+        receiverThread.start();
     }
 
     private void processReceivedData(byte[] data) {
@@ -160,16 +143,14 @@ public class UDP implements MavlinkClient {
             pipedOutputStream.write(data);
             pipedOutputStream.flush();
         } catch (IOException e) {
-            Log.e(TAG, "Error writing to MAVLink input pipe", e);
+            System.err.println("Error writing to MAVLink input pipe: " + e.getMessage());
         }
-
-        Log.v(TAG, "Received " + data.length + " bytes from " + remoteAddress.getHostAddress());
     }
 
-    public void initializeMavlink() {
+    void initializeMavlink() {
         if (mavlinkConnection == null) {
             mavlinkConnection = MavlinkConnection.create(pipedInputStream, new UdpOutputStream());
-            Log.d(TAG, "MAVLink connection initialized");
+            System.out.println("MAVLink connection initialized");
         }
     }
 
@@ -181,13 +162,13 @@ public class UDP implements MavlinkClient {
                 while (!Thread.currentThread().isInterrupted()) {
                     MavlinkMessage<?> msg = mavlinkConnection.next();
                     if (msg != null) {
-                        Log.i(TAG, "📥 MAVLink message: " + msg.getPayload().getClass().getSimpleName());
+                        System.out.println("📥 MAVLink message: " + msg.getPayload().getClass().getSimpleName());
                     }
                 }
             } catch (IOException e) {
-                Log.e(TAG, "MAVLink reader stopped", e);
+                System.err.println("MAVLink reader stopped: " + e.getMessage());
             }
-        }, "MAVLink-Reader-Thread");
+        }, "MAVLink-Reader");
         mavlinkReaderThread.start();
     }
 
@@ -202,21 +183,21 @@ public class UDP implements MavlinkClient {
             try {
                 sendData(java.util.Arrays.copyOfRange(b, off, off + len));
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new IOException("UDP output write error", e);
             }
         }
     }
 
-    public void sendMavlinkCommand(int systemId, int componentId, Object command) {
-        if (mavlinkConnection != null) {
-            try {
-                mavlinkConnection.send1(systemId, componentId, command);
-                Log.d(TAG, "MAVLink command sent");
-            } catch (IOException e) {
-                Log.e(TAG, "Failed to send MAVLink command", e);
-            }
-        }
-    }
+//    public void sendMavlinkCommand(int systemId, int componentId, Object command) {
+//        if (mavlinkConnection != null) {
+//            try {
+//                mavlinkConnection.send1(systemId, componentId, command);
+//                System.out.println("MAVLink command sent");
+//            } catch (IOException e) {
+//                System.err.println("Failed to send MAVLink command: " + e.getMessage());
+//            }
+//        }
+//    }
 
     public MavlinkConnection getMavlinkConnection() {
         return mavlinkConnection;

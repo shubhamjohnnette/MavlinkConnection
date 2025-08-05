@@ -1,5 +1,6 @@
 package com.johnnette;
 
+import Connection.ConnectionManager;
 import com.johnnette.LoadConnectionData.DeviceRegistry;
 import com.johnnette.savedConnection.Device;
 import com.johnnette.savedConnection.DeviceJsonUtil;
@@ -12,7 +13,7 @@ public class App {
 
 
         try {
-            Device device = new Device("192.168.1.2","192.168.1.9",8080,"udp",true);
+            Device device = new Device("192.168.1.2","192.168.1.9",8080,"udp",false);
             File file = new File(System.getProperty("user.home") + File.separator + "Documents" + File.separator + "devices.json");
 
 //            Device edited = new Device("192.168.1.2", "192.168.0.100", 5555, "sensor", true);
@@ -27,6 +28,8 @@ public class App {
             DeviceJsonUtil.loadConnectionToGlobalList(file);
             DeviceJsonUtil.addConnection(device,file);
             System.out.println("Loaded Devices:");
+            ConnectionManager connectionManager = new ConnectionManager();
+            connectionManager.autoConnect();
             for (Device d : DeviceRegistry.devices) {
                 System.out.println("- " + d.name + " [" + d.type + "]"+ d.ip);
             }

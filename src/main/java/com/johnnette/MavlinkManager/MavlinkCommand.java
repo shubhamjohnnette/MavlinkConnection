@@ -1,11 +1,9 @@
-package com.johnnette.gcs.MavlinkManager;
+package com.johnnette.MavlinkManager;
 
 
 
-import io.dronefleet.mavlink.common.CommandLong;
-import io.dronefleet.mavlink.common.MavCmd;
-import io.dronefleet.mavlink.common.ParamRequestList;
-import io.dronefleet.mavlink.common.ParamSet;
+import io.dronefleet.mavlink.common.*;
+
 import io.dronefleet.mavlink.minimal.MavType;
 
 public class MavlinkCommand {
