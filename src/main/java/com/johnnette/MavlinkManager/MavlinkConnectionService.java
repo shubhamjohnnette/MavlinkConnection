@@ -1,13 +1,13 @@
 package com.johnnette.MavlinkManager;
 
-import Connection.ConnectionManager;
+import com.johnnette.Connection.ConnectionManager;
 
 public class MavlinkConnectionService {
 
-    private Thread connectionThread;
-    private volatile boolean running = false;
+    private static Thread connectionThread;
+    private static volatile boolean running = false;
 
-    public void start() {
+    public static void start() {
         if (running) {
             System.out.println("Service already running.");
             return;
@@ -17,7 +17,7 @@ public class MavlinkConnectionService {
         connectionThread = new Thread(() -> {
             try {
                 ConnectionManager connectionManager = new ConnectionManager();
-                connectionManager.autoConnect();  // No context in core Java
+                connectionManager.autoConnect();
                 System.out.println("MAVLink AutoConnect successful.");
             } catch (Exception e) {
                 System.err.println("AutoConnect failed: " + e.getMessage());

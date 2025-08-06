@@ -1,4 +1,4 @@
-package Connection;
+package com.johnnette.Connection;
 
 import io.dronefleet.mavlink.MavlinkConnection;
 

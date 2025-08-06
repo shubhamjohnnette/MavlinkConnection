@@ -1,4 +1,4 @@
-package Connection;
+package com.johnnette.Connection;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class TCP implements MavlinkClient {
 
                 System.out.println("✅ Connected to " + host + ":" + port);
 
-                startReading(); // Start background read loop
+//                startReading(); // Start background read loop
 
             } else {
                 throw new IOException("Connection failed: Socket not connected");
@@ -56,7 +56,7 @@ public class TCP implements MavlinkClient {
                 try {
                     MavlinkMessage<?> message = mavlinkConnection.next();
                     if (message != null) {
-                        System.out.println("📥 Received MAVLink message: " + message.getPayload().toString());
+//                        System.out.println("📥 Received MAVLink message: " + message.getPayload().toString());
                         // Optionally, you could call a listener or queue here
                     }
                 } catch (IOException e) {

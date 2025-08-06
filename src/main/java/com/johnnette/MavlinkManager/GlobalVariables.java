@@ -56,7 +56,7 @@ public class GlobalVariables {
     public static boolean IS_ARM ;
     public static boolean IS_GUIDED;
     public static final AtomicBoolean CONNECTION_EXIST = new AtomicBoolean(false) ;
-    public static io.dronefleet.mavlink.minimal.MavType DRONE_TYPE;
+    public static MavType DRONE_TYPE;
     public static int BATTERY_CELLS ;
     public static int WP_RADIUS = 50;
 

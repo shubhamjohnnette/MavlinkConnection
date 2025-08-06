@@ -1,9 +1,7 @@
-package Connection;
+package com.johnnette.Connection;
 
 import com.johnnette.LoadConnectionData.DeviceRegistry;
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
+
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -15,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.johnnette.MavlinkManager.GlobalVariables;
 import com.johnnette.MavlinkManager.MavlinkManager;
 import com.johnnette.savedConnection.Device;
 import io.dronefleet.mavlink.*;
@@ -47,6 +46,10 @@ public class ConnectionManager {
             for (Device conn : autoConnectionOn) {
                 if (connected.get()) break;
                 startMavlinkReceiver(conn);
+//                Save connection data to rety connection if disconnected between or with some error
+                GlobalVariables.DATA= conn;
+
+
             }
 
             if (!connected.get()) {
@@ -67,14 +70,20 @@ public class ConnectionManager {
             switch (conn.type.toUpperCase()) {
                 case "TCP":
                     client = new TCP();
+                    GlobalVariables.CONNECTION_TYPE= GlobalVariables.MavlinkConnectionType.TCP;
                     break;
                 case "UDP":
                     client = new UDP();
+                    GlobalVariables.CONNECTION_TYPE= GlobalVariables.MavlinkConnectionType.UDP;
                     break;
                 case "UDPCLIENT":
                     client = new UDPClient();
+                    GlobalVariables.CONNECTION_TYPE= GlobalVariables.MavlinkConnectionType.UDP;
                     break;
-                default:
+                case "USB" :
+                    GlobalVariables.CONNECTION_TYPE= GlobalVariables.MavlinkConnectionType.USB;
+                    System.out.println("Upcoming Feature");
+                    default:
                     System.out.println(TAG + ": ❌ Unknown connection type: " + conn.type);
                     return;
             }

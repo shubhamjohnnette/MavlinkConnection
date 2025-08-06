@@ -1,4 +1,4 @@
-package Connection;
+package com.johnnette.Connection;
 
 import java.io.IOException;
 import java.io.OutputStream;
