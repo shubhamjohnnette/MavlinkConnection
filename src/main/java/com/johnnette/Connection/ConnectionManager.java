@@ -130,18 +130,18 @@ public class ConnectionManager {
 
                 MavlinkManager.getInstance().setMavlinkConnection(mavConn);
 
-                while (true) {
-                    try {
-                        MavlinkMessage<?> msg = mavConn.next();
-                        if (msg != null) {
-                            String name = msg.getPayload().getClass().getSimpleName();
-                            System.out.println(TAG + ": 📥 MAVLink message received: " + name);
-                        }
-                    } catch (Exception e) {
-                        System.out.println(TAG + ": ⚠️ MAVLink decoding error: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
+//                while (true) {
+//                    try {
+//                        MavlinkMessage<?> msg = mavConn.next();
+//                        if (msg != null) {
+//                            String name = msg.getPayload().getClass().getSimpleName();
+//                            System.out.println(TAG + ": 📥 MAVLink message received: " + name);
+//                        }
+//                    } catch (Exception e) {
+//                        System.out.println(TAG + ": ⚠️ MAVLink decoding error: " + e.getMessage());
+//                        e.printStackTrace();
+//                    }
+//                }
 
             } catch (Exception e) {
                 System.out.println(TAG + ": ❌ Error reading MAVLink messages: " + e.getMessage());

@@ -57,7 +57,7 @@ public class UDP implements MavlinkClient {
 
             startReceiver();
             initializeMavlink();
-            startMavlinkReader();
+//            startMavlinkReader();
 
         } catch (UnknownHostException e) {
             throw new IOException("Unknown host: " + host, e);
@@ -161,7 +161,7 @@ public class UDP implements MavlinkClient {
                 while (!Thread.currentThread().isInterrupted()) {
                     MavlinkMessage<?> msg = mavlinkConnection.next();
                     if (msg != null) {
-                        System.out.println("📥 MAVLink message: " + msg.getPayload().getClass().getSimpleName());
+//                        System.out.println("📥 MAVLink message: " + msg.getPayload().getClass().getSimpleName());
                     }
                 }
             } catch (IOException e) {
