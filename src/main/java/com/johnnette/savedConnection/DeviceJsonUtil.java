@@ -14,6 +14,7 @@ public class DeviceJsonUtil {
         List<Device> devices = loadConnection(file); // load existing
         devices.add(device);                      // add new device
         saveAll(devices, file);            // overwrite file with updated list
+//        loadConnectionToGlobalList(file);
     }
 
     // Helper: Load all devices from JSON file

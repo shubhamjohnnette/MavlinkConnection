@@ -5,28 +5,20 @@ import java.nio.file.*;
 
 public class DocumentsPathFinder {
 
-//    public static void main(String[] args) {
-//        File file = new File(getDocumentsFolder(), "devices.json");
-//        System.out.println("Devices file path: " + file.getAbsolutePath());
-//    }
+    public static final String DOCUMENTS_PATH = resolveDocumentsPath();
 
-    public static String getDocumentsFolder() {
+    private static String resolveDocumentsPath() {
         String os = System.getProperty("os.name").toLowerCase();
         String userHome = System.getProperty("user.home");
 
         try {
             if (os.contains("win")) {
-                // Windows: Usually in %USERPROFILE%\Documents
                 Path docPath = Paths.get(System.getenv("USERPROFILE"), "Documents");
                 if (Files.exists(docPath)) return docPath.toString();
-            }
-            else if (os.contains("mac")) {
-                // macOS: Usually ~/Documents
+            } else if (os.contains("mac")) {
                 Path docPath = Paths.get(userHome, "Documents");
                 if (Files.exists(docPath)) return docPath.toString();
-            }
-            else {
-                // Linux/Ubuntu: Use xdg-user-dir for localization support
+            } else {
                 Process process = new ProcessBuilder("xdg-user-dir", "DOCUMENTS")
                         .redirectErrorStream(true)
                         .start();
@@ -42,8 +34,7 @@ public class DocumentsPathFinder {
             e.printStackTrace();
         }
 
-        // Fallback: Default Documents under home directory
+        // Fallback
         return Paths.get(userHome, "Documents").toString();
     }
 }
-

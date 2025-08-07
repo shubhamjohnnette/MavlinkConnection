@@ -74,8 +74,8 @@ public  class MavlinkManager {
                     if (message != null) {
                         // Post to main thread executor
                         mainThreadExecutor.submit(() -> notifyListeners(message));
-                        String name = message.getPayload().getClass().getSimpleName();
-                        System.out.println(name);
+//                        String name = message.getPayload().getClass().getSimpleName();
+//                        System.out.println(name);
                     }
                 }
             } catch (Exception e) {

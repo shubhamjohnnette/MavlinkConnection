@@ -24,19 +24,12 @@
       <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/io.dronefleet.mavlink/mavlink -->
+
     <dependency>
       <groupId>io.dronefleet.mavlink</groupId>
       <artifactId>mavlink</artifactId>
       <version>1.1.11</version>
     </dependency>
-<!--    &lt;!&ndash; https://mvnrepository.com/artifact/io.dronefleet.mavlink/mavlink-protocol &ndash;&gt;-->
-<!--    <dependency>-->
-<!--      <groupId>io.dronefleet.mavlink</groupId>-->
-<!--      <artifactId>mavlink-protocol</artifactId>-->
-<!--      <version>1.1.11</version>-->
-<!--    </dependency>-->
-<!-- -->
 
     <dependency>
       <groupId>org.json</groupId>

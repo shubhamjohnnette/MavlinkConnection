@@ -1,5 +1,4 @@
 package com.johnnette.Connection;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
@@ -9,10 +8,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import io.dronefleet.mavlink.MavlinkConnection;
-import io.dronefleet.mavlink.common.Heartbeat;
-import io.dronefleet.mavlink.common.MavAutopilot;
-import io.dronefleet.mavlink.common.MavState;
-import io.dronefleet.mavlink.common.MavType;
+import io.dronefleet.mavlink.minimal.Heartbeat;
+import io.dronefleet.mavlink.minimal.MavAutopilot;
+import io.dronefleet.mavlink.minimal.MavState;
+import io.dronefleet.mavlink.minimal.MavType;
+import io.dronefleet.mavlink.common.*;
 
 public class UDPClient implements MavlinkClient {
     private static final int BUFFER_SIZE = 65535;
@@ -174,23 +174,35 @@ public class UDPClient implements MavlinkClient {
         System.out.println("[INFO] MAVLink connection initialized");
 
         sendExecutor.submit(() -> {
-            Heartbeat heartbeat = Heartbeat.builder()
-                    .type(MavType.MAV_TYPE_GCS)
-                    .autopilot(MavAutopilot.MAV_AUTOPILOT_INVALID)
-                    .systemStatus(MavState.MAV_STATE_UNINIT)
-                    .mavlinkVersion(3)
-                    .build();
-                mavlinkConnection.send1(255, 1, heartbeat);
-            System.out.println("[INFO] Initial heartbeat sent");
+            try {
+                Heartbeat heartbeat = Heartbeat.builder()
+                        .type(MavType.MAV_TYPE_GCS)
+                        .autopilot(MavAutopilot.MAV_AUTOPILOT_INVALID)
+                        .systemStatus(MavState.MAV_STATE_UNINIT)
+                        .mavlinkVersion(3)
+                        .build();
+                mavlinkConnection.send2(255, 1, heartbeat);
+                System.out.println("[INFO] Initial heartbeat sent");
+            } catch (IOException e) {
+                System.err.println("[ERROR] Failed to send Heartbeat: " + e.getMessage());
+                e.printStackTrace();
+            }
+
         });
     }
 //Testing Command send
-    public void sendMavlinkCommand(int systemId, int componentId, Object command) {
-        if (mavlinkConnection != null) {
-            sendExecutor.submit(() -> {
-                                    mavlinkConnection.send1(systemId, componentId, command);
+public void sendMavlinkCommand(int systemId, int componentId, Object command) {
+    if (mavlinkConnection != null) {
+        sendExecutor.submit(() -> {
+            try {
+                mavlinkConnection.send2(systemId, componentId, command);
                 System.out.println("[COMMAND] Sent: " + command.getClass().getSimpleName());
-            });
-        }
+            } catch (IOException e) {
+                System.err.println("[ERROR] Failed to send MAVLink command: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
     }
+}
+
 }

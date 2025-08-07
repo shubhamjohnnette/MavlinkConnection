@@ -1,71 +1,84 @@
-package com.johnnette;
-
-
-import com.johnnette.LoadConnectionData.DeviceRegistry;
-import com.johnnette.MavlinkManager.MavlinkCommand;
-import com.johnnette.MavlinkManager.MavlinkConnectionService;
-import com.johnnette.savedConnection.Device;
-import com.johnnette.savedConnection.DeviceJsonUtil;
-
-import java.io.File;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
-import static com.johnnette.utils.DocumentsPathFinder.getDocumentsFolder;
-
-public class App {
-    public static void main(String[] args) {
-
-
-        try {
-            Device device = new Device("localhost","10.255.211.85",14550,"udp",true);
-           // File file = new File(System.getProperty("user.home") + File.separator + "Documents" + File.separator + "devices.json");
-            File file = new File(getDocumentsFolder(), "devices.json");
-            System.out.println("Devices file path: " + file.getAbsolutePath());
-//            Device edited = new Device("192.168.1.2", "192.168.0.100", 5555, "sensor", true);
-//            boolean updated = DeviceJsonUtil.updateDevice(edited, file);
-//            System.out.println(updated ? "Updated!" : "Device not found!");
+//package com.johnnette;
 //
-//// Delete device example
-//            boolean deleted = DeviceJsonUtil.deleteDeviceByName("192.168.1.2", file);
-//            System.out.println(deleted ? "Deleted!" : "Device not found!");
-
-
-            DeviceJsonUtil.loadConnectionToGlobalList(file);
+//
+//import com.johnnette.LoadConnectionData.DeviceRegistry;
+//import com.johnnette.MavlinkManager.MavlinkCommand;
+//import com.johnnette.MavlinkManager.MavlinkConnectionService;
+//import com.johnnette.savedConnection.Device;
+//import com.johnnette.savedConnection.DeviceJsonUtil;
+//import io.dronefleet.mavlink.MavlinkMessage;
+//import java.io.File;
+//import java.util.concurrent.Executors;
+//import java.util.concurrent.ScheduledExecutorService;
+//import java.util.concurrent.TimeUnit;
+//import com.johnnette.MavlinkManager.MavlinkManager;
+//
+//
+////import static com.johnnette.utils.DocumentsPathFinder.getDocumentsFolder;
+//
+//public class App {
+//    public static void main(String[] args) {
+//
+//
+//        try {
+//            Device device = new Device("localhost","10.255.211.85",14550,"udp",true);
+//           // File file = new File(System.getProperty("user.home") + File.separator + "Documents" + File.separator + "devices.json");
+//            File file = new File(DeviceRegistry.getPath(), "devices.json");
+//            System.out.println("Devices file path: " + file.getAbsolutePath());
+////            Device edited = new Device("192.168.1.2", "192.168.0.100", 5555, "sensor", true);
+////            boolean updated = DeviceJsonUtil.updateDevice(edited, file);
+////            System.out.println(updated ? "Updated!" : "Device not found!");
+////
+////// Delete device example
+////            boolean deleted = DeviceJsonUtil.deleteDeviceByName("192.168.1.2", file);
+////            System.out.println(deleted ? "Deleted!" : "Device not found!");
+//
+//
+////            DeviceJsonUtil.loadConnectionToGlobalList(file);
 //            DeviceJsonUtil.addConnection(device,file);
-            System.out.println("Loaded Devices:");
-            MavlinkConnectionService.start();
-            for (Device d : DeviceRegistry.devices) {
-                System.out.println("- " + d.name + " [" + d.type + "]"+ d.ip);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
-            scheduler.schedule(() -> {
-                System.out.println("Commandttt: onCreate: entered");
-
-                MavlinkCommand mavlinkCommand = new MavlinkCommand();
-                System.out.println("Commandttt: onCreate: instance");
-
-                mavlinkCommand.ArmDisarm(true, true);
-                System.out.println("Commandttt: onCreate: success");
-                mavlinkCommand.sendCommandReadParam();
-                // Shutdown after the task is executed
-                scheduler.shutdown();
-            }, 5, TimeUnit.SECONDS);
-
-            // Optionally shutdown the scheduler after the task (if only one task)
-            scheduler.shutdown();
-
-
-        }
-
-    }
-
-
+//            System.out.println("Loaded Devices:");
+//            MavlinkConnectionService.start();
+//            for (Device d : DeviceRegistry.devices) {
+//                System.out.println("- " + d.name + " [" + d.type + "]"+ d.ip);
+//            }
+//
+////            Starting Connection
+//            MavlinkConnectionService.start();
+//
+//            // Register message listener
+//            MavlinkManager.getInstance().addListener(new MavlinkManager.MavlinkMessageListener() {
+//                @Override
+//                public void onMavlinkMessage(MavlinkMessage message) {
+////                    Read and filter message here
+//                    System.out.println("Receved : "+message);
+//                }
+//            });
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//
+//            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+//
+//            scheduler.schedule(() -> {
+//                System.out.println("Commandttt: onCreate: entered");
+//
+//                MavlinkCommand mavlinkCommand = new MavlinkCommand();
+//                System.out.println("Commandttt: onCreate: instance");
+//
+//                mavlinkCommand.ArmDisarm(true, true);
+//                System.out.println("Commandttt: onCreate: success");
+//                mavlinkCommand.sendCommandReadParam();
+//                // Shutdown after the task is executed
+//                scheduler.shutdown();
+//            }, 5, TimeUnit.SECONDS);
+//
+//            // Optionally shutdown the scheduler after the task (if only one task)
+//            scheduler.shutdown();
+//
+//
+//        }
+//}
+//
+//

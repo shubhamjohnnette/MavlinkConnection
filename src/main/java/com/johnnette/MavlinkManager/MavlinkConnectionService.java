@@ -1,6 +1,11 @@
 package com.johnnette.MavlinkManager;
 
 import com.johnnette.Connection.ConnectionManager;
+import com.johnnette.LoadConnectionData.DeviceRegistry;
+import com.johnnette.savedConnection.DeviceJsonUtil;
+
+import java.io.File;
+import java.io.IOException;
 
 public class MavlinkConnectionService {
 
@@ -8,6 +13,17 @@ public class MavlinkConnectionService {
     private static volatile boolean running = false;
 
     public static void start() {
+        if (DeviceRegistry.getPath() != null)
+            try{
+                File file = new File(DeviceRegistry.getPath(), "devices.json");
+                DeviceJsonUtil.loadConnectionToGlobalList(file);
+                if (DeviceRegistry.devices.isEmpty()){
+                    System.out.println("No connetion found connecting to default ip and port");
+                }
+            }catch (Exception e){
+                System.out.println("Error : could not load devices ");
+            }
+
         if (running) {
             System.out.println("Service already running.");
             return;
