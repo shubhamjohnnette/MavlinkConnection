@@ -47,29 +47,6 @@ public class TCP implements MavlinkClient {
         }
     }
 
-    private void startReading() {
-        if (readThread != null) return;
-
-        isReading = true;
-        readThread = new Thread(() -> {
-            while (isReading && !Thread.currentThread().isInterrupted()) {
-                try {
-                    MavlinkMessage<?> message = mavlinkConnection.next();
-                    if (message != null) {
-//                        System.out.println("📥 Received MAVLink message: " + message.getPayload().toString());
-                        // Optionally, you could call a listener or queue here
-                    }
-                } catch (IOException e) {
-                    if (isReading) {
-                        System.err.println("❌ MAVLink read error: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }, "TCP-Mavlink-Reader");
-
-        readThread.start();
-    }
 
     @Override
     public void disconnect() {

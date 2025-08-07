@@ -30,7 +30,7 @@ public class App {
 
 
             DeviceJsonUtil.loadConnectionToGlobalList(file);
-            DeviceJsonUtil.addConnection(device,file);
+//            DeviceJsonUtil.addConnection(device,file);
             System.out.println("Loaded Devices:");
             MavlinkConnectionService.start();
             for (Device d : DeviceRegistry.devices) {

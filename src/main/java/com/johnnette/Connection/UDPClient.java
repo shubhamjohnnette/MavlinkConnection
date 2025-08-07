@@ -9,10 +9,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import io.dronefleet.mavlink.MavlinkConnection;
-import io.dronefleet.mavlink.minimal.Heartbeat;
-import io.dronefleet.mavlink.minimal.MavAutopilot;
-import io.dronefleet.mavlink.minimal.MavState;
-import io.dronefleet.mavlink.minimal.MavType;
+import io.dronefleet.mavlink.common.Heartbeat;
+import io.dronefleet.mavlink.common.MavAutopilot;
+import io.dronefleet.mavlink.common.MavState;
+import io.dronefleet.mavlink.common.MavType;
 
 public class UDPClient implements MavlinkClient {
     private static final int BUFFER_SIZE = 65535;
@@ -180,16 +180,15 @@ public class UDPClient implements MavlinkClient {
                     .systemStatus(MavState.MAV_STATE_UNINIT)
                     .mavlinkVersion(3)
                     .build();
-
-//                mavlinkConnection.send(255, 1, heartbeat);
+                mavlinkConnection.send1(255, 1, heartbeat);
             System.out.println("[INFO] Initial heartbeat sent");
         });
     }
-
+//Testing Command send
     public void sendMavlinkCommand(int systemId, int componentId, Object command) {
         if (mavlinkConnection != null) {
             sendExecutor.submit(() -> {
-                //                    mavlinkConnection.send1(systemId, componentId, command);
+                                    mavlinkConnection.send1(systemId, componentId, command);
                 System.out.println("[COMMAND] Sent: " + command.getClass().getSimpleName());
             });
         }

@@ -187,16 +187,6 @@ public class UDP implements MavlinkClient {
         }
     }
 
-//    public void sendMavlinkCommand(int systemId, int componentId, Object command) {
-//        if (mavlinkConnection != null) {
-//            try {
-//                mavlinkConnection.send1(systemId, componentId, command);
-//                System.out.println("MAVLink command sent");
-//            } catch (IOException e) {
-//                System.err.println("Failed to send MAVLink command: " + e.getMessage());
-//            }
-//        }
-//    }
 
     public MavlinkConnection getMavlinkConnection() {
         return mavlinkConnection;
