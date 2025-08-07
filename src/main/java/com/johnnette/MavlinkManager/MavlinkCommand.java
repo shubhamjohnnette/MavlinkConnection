@@ -210,7 +210,7 @@ public class MavlinkCommand {
 
         // sending the param value to mavlink one by one
         MavlinkManager.SendMavlinkMessageOrCommand(gcsFailsafe_LongTimeoutValue, true);
-//        MavlinkService.SendMavlinkMessageOrCommand(gcsFailsafe_ACTION, true);
+        MavlinkManager.SendMavlinkMessageOrCommand(gcsFailsafe_ACTION, true);
         MavlinkManager.SendMavlinkMessageOrCommand(gcsFailsafe_isEnabled, true);
     }
 

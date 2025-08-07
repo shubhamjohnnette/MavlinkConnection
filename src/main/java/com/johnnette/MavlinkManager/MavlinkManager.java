@@ -48,10 +48,10 @@ public  class MavlinkManager {
 
     // Set / switch active MavlinkConnection
     public synchronized void setMavlinkConnection(MavlinkConnection connection) {
-        stopReading();
+//        stopReading();
         this.mavlinkConnection = connection;
         if (connection != null) {
-//            startReading();
+            startReading();
         }
     }
 
@@ -73,7 +73,9 @@ public  class MavlinkManager {
                     MavlinkMessage message = mavlinkConnection.next();
                     if (message != null) {
                         // Post to main thread executor
-//                        mainThreadExecutor.submit(() -> notifyListeners(message));
+                        mainThreadExecutor.submit(() -> notifyListeners(message));
+                        String name = message.getPayload().getClass().getSimpleName();
+                        System.out.println(name);
                     }
                 }
             } catch (Exception e) {

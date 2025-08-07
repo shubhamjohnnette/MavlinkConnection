@@ -12,14 +12,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.johnnette.utils.DocumentsPathFinder.getDocumentsFolder;
+
 public class App {
     public static void main(String[] args) {
 
 
         try {
-            Device device = new Device("localhost","192.168.1.13",14550,"tcp",true);
-            File file = new File(System.getProperty("user.home") + File.separator + "Documents" + File.separator + "devices.json");
-
+            Device device = new Device("localhost","10.255.211.85",14550,"udp",true);
+           // File file = new File(System.getProperty("user.home") + File.separator + "Documents" + File.separator + "devices.json");
+            File file = new File(getDocumentsFolder(), "devices.json");
+            System.out.println("Devices file path: " + file.getAbsolutePath());
 //            Device edited = new Device("192.168.1.2", "192.168.0.100", 5555, "sensor", true);
 //            boolean updated = DeviceJsonUtil.updateDevice(edited, file);
 //            System.out.println(updated ? "Updated!" : "Device not found!");
