@@ -1,13 +1,27 @@
 package com.johnnette.utils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.file.*;
 
 public class DocumentsPathFinder {
 
-    public static final String DOCUMENTS_PATH = resolveDocumentsPath();
+    private static String documentsPath = null;
 
-    private static String resolveDocumentsPath() {
+    public static String getDocumentsPath() {
+        if (documentsPath == null) {
+            documentsPath = resolveDefaultDocumentsPath();
+        }
+        return documentsPath;
+    }
+
+    public static void setDocumentsPath(String customPath) {
+        if (customPath != null && !customPath.isBlank()) {
+            documentsPath = customPath;
+        }
+    }
+
+    private static String resolveDefaultDocumentsPath() {
         String os = System.getProperty("os.name").toLowerCase();
         String userHome = System.getProperty("user.home");
 
@@ -26,9 +40,7 @@ public class DocumentsPathFinder {
                 String path = reader.readLine();
                 process.waitFor();
 
-                if (path != null && !path.isBlank()) {
-                    return path;
-                }
+                if (path != null && !path.isBlank()) return path;
             }
         } catch (Exception e) {
             e.printStackTrace();

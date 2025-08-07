@@ -15,13 +15,11 @@ public class MavlinkConnectionService {
     public static void start() {
         if (DeviceRegistry.getPath() != null)
             try{
-                File file = new File(DeviceRegistry.getPath(), "devices.json");
-                DeviceJsonUtil.loadConnectionToGlobalList(file);
-                if (DeviceRegistry.devices.isEmpty()){
-                    System.out.println("No connetion found connecting to default ip and port");
-                }
+//                File file = new File(DeviceRegistry.getPath(), "devices.json");
+                DeviceJsonUtil.loadConnectionToGlobalList();
+
             }catch (Exception e){
-                System.out.println("Error : could not load devices ");
+                System.out.println("Error : could not load devices "+e);
             }
 
         if (running) {

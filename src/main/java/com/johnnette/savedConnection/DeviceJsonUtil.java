@@ -10,20 +10,20 @@ import java.util.*;
 public class DeviceJsonUtil {
 
     // CREATE: Save a single device entry to JSON file
-    public static void addConnection(Device device, File file) throws IOException {
-        List<Device> devices = loadConnection(file); // load existing
+    public static void addConnection(Device device) throws IOException {
+        List<Device> devices = loadConnection(); // load existing
         devices.add(device);                      // add new device
-        saveAll(devices, file);            // overwrite file with updated list
+        saveAll(devices);            // overwrite file with updated list
 //        loadConnectionToGlobalList(file);
     }
 
     // Helper: Load all devices from JSON file
-    private static List<Device> loadConnection(File file) throws IOException {
+    private static List<Device> loadConnection() throws IOException {
         List<Device> list = new ArrayList<>();
-        if (!file.exists()) return list;
+        if (DeviceRegistry.getPath()==null) return list;
 
         StringBuilder jsonStr = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(DeviceRegistry.getPath()))) {
             String line;
             while ((line = reader.readLine()) != null)
                 jsonStr.append(line);
@@ -46,7 +46,7 @@ public class DeviceJsonUtil {
     }
 
     // Helper: Save all devices to JSON file
-    private static void saveAll(List<Device> devices, File file) throws IOException {
+    private static void saveAll(List<Device> devices) throws IOException {
         JSONArray array = new JSONArray();
         for (Device d : devices) {
             JSONObject obj = new JSONObject();
@@ -59,17 +59,23 @@ public class DeviceJsonUtil {
             array.put(obj);
         }
 
-        try (FileWriter writer = new FileWriter(file)) {
+        try (FileWriter writer = new FileWriter(DeviceRegistry.getPath())) {
             writer.write(array.toString(2)); // pretty print
         }
     }
 
     // GLOBAL LOAD: Load JSON devices to global list
-    public static void loadConnectionToGlobalList(File file) throws Exception {
-        if (!file.exists()) return;
+    public static void loadConnectionToGlobalList() throws Exception {
+        File file = new File(DeviceRegistry.getPath(),"devices.json");
+
+        if (DeviceRegistry.getPath()== null){
+            System.out.println("path empty");
+            return;
+        }
 
         StringBuilder json = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            System.out.println(DeviceRegistry.getPath());
             String line;
             while ((line = br.readLine()) != null) {
                 json.append(line);
@@ -94,8 +100,8 @@ public class DeviceJsonUtil {
     }
 
 //    update the device
-    public static boolean updateConnection(Device updatedDevice, File file) throws IOException {
-        List<Device> devices = loadConnection(file);
+    public static boolean updateConnection(Device updatedDevice) throws IOException {
+        List<Device> devices = loadConnection();
         boolean found = false;
 
         for (int i = 0; i < devices.size(); i++) {
@@ -108,7 +114,7 @@ public class DeviceJsonUtil {
         }
 
         if (found) {
-            saveAll(devices, file);  // Write updated list
+            saveAll(devices);  // Write updated list
         }
 
         return found;  // true if updated, false if not found
@@ -116,12 +122,12 @@ public class DeviceJsonUtil {
 
 //    delete a device
 
-    public static boolean deleteConnectionByName(String name, File file) throws IOException {
-        List<Device> devices = loadConnection(file);
+    public static boolean deleteConnectionByName(String name) throws IOException {
+        List<Device> devices = loadConnection();
         boolean removed = devices.removeIf(d -> d.name.equals(name));  // Remove matching
 
         if (removed) {
-            saveAll(devices, file);  // Rewrite file with filtered list
+            saveAll(devices);  // Rewrite file with filtered list
         }
 
         return removed;  // true if something was deleted
