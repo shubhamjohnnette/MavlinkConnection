@@ -4,6 +4,7 @@ package com.johnnette;
 import com.johnnette.LoadConnectionData.DeviceRegistry;
 import com.johnnette.MavlinkManager.MavlinkCommand;
 import com.johnnette.MavlinkManager.MavlinkConnectionService;
+import com.johnnette.UserInterface.UserService;
 import com.johnnette.savedConnection.Device;
 import com.johnnette.savedConnection.DeviceJsonUtil;
 import io.dronefleet.mavlink.MavlinkMessage;
@@ -21,10 +22,10 @@ public class App {
 
 
         try {
-            Device device = new Device("localhost","10.255.211.85",14550,"udp",true);
+          //  Device device = new Device("localhost","10.255.211.85",14550,"udp",true);
            // File file = new File(System.getProperty("user.home") + File.separator + "Documents" + File.separator + "devices.json");
-            File file = new File(DeviceRegistry.getPath(), "devices.json");
-            System.out.println("Devices file path: " + file.getAbsolutePath());
+            //File file = new File(DeviceRegistry.getPath(), "devices.json");
+            //System.out.println("Devices file path: " + file.getAbsolutePath());
 //            Device edited = new Device("192.168.1.2", "192.168.0.100", 5555, "sensor", true);
 //            boolean updated = DeviceJsonUtil.updateDevice(edited, file);
 //            System.out.println(updated ? "Updated!" : "Device not found!");
@@ -36,15 +37,16 @@ public class App {
 
 //            DeviceJsonUtil.loadConnectionToGlobalList(file);
 //            DeviceJsonUtil.addConnection(device,file);
-            System.out.println("Loaded Devices:");
-            MavlinkConnectionService.start();
-            for (Device d : DeviceRegistry.devices) {
-                System.out.println("- " + d.name + " [" + d.type + "]"+ d.ip);
-            }
+           // System.out.println("Loaded Devices:");
+//            MavlinkConnectionService.start();
+//            for (Device d : DeviceRegistry.devices) {
+//                System.out.println("- " + d.name + " [" + d.type + "]"+ d.ip);
+//            }
 
 //            Starting Connection
-            MavlinkConnectionService.start();
-
+           // MavlinkConnectionService.start();
+            UserService userService = new UserService();
+            userService.autoConnect();
             // Register message listener
             MavlinkManager.getInstance().addListener(new MavlinkManager.MavlinkMessageListener() {
                 @Override

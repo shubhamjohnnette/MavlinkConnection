@@ -62,7 +62,9 @@ public class ConnectionManager {
     private boolean isMavlinkPacket(byte[] data) {
         return data != null && data.length > 0 && (data[0] == (byte) 0xFE || data[0] == (byte) 0xFD);
     }
-
+ public void mavStartService(Device conn ){
+        startMavlinkReceiver(conn);
+ }
     private void startMavlinkReceiver(Device conn) {
         System.out.println(TAG + ": 📡 Connecting to MAVLink: " + conn.ip + ":" + conn.port);
 

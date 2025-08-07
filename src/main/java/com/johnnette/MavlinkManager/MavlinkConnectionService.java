@@ -42,7 +42,7 @@ public class MavlinkConnectionService {
         connectionThread.start();
     }
 
-    public void stop() {
+    public static void stop() {
         running = false;
         if (connectionThread != null && connectionThread.isAlive()) {
             connectionThread.interrupt();
