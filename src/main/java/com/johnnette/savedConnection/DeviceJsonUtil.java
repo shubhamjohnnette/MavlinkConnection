@@ -5,28 +5,35 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeviceJsonUtil {
 
     // CREATE: Save a single device entry to JSON file
     public static void addConnection(Device device) throws IOException {
         List<Device> devices = loadConnection(); // load existing
-        devices.add(device);                      // add new device
-        saveAll(devices);            // overwrite file with updated list
-//        loadConnectionToGlobalList(file);
+        devices.add(device);                     // add new device
+        saveAll(devices);                        // overwrite file
     }
 
     // Helper: Load all devices from JSON file
     private static List<Device> loadConnection() throws IOException {
         List<Device> list = new ArrayList<>();
-        if (DeviceRegistry.getPath()==null) return list;
+
+        File file = getDeviceFile();
+        if (!file.exists()) {
+            return list; // No file → empty list
+        }
 
         StringBuilder jsonStr = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(DeviceRegistry.getPath()))) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line;
-            while ((line = reader.readLine()) != null)
+            while ((line = reader.readLine()) != null) {
                 jsonStr.append(line);
+            }
         }
 
         JSONArray array = new JSONArray(jsonStr.toString());
@@ -37,8 +44,7 @@ public class DeviceJsonUtil {
                     obj.getString("ip"),
                     obj.getInt("port"),
                     obj.optString("type", "tcp"),
-                    obj.getBoolean("isActive")
-
+                    obj.optBoolean("isActive", false)
             );
             list.add(d);
         }
@@ -55,27 +61,28 @@ public class DeviceJsonUtil {
             obj.put("port", d.port);
             obj.put("type", d.type);
             obj.put("isActive", d.isActive);
-
             array.put(obj);
         }
 
-        try (FileWriter writer = new FileWriter(DeviceRegistry.getPath())) {
-            writer.write(array.toString(2)); // pretty print
+        File file = getDeviceFile();
+        try (Writer writer = new OutputStreamWriter(
+                new FileOutputStream(file), StandardCharsets.UTF_8)) {
+            writer.write(array.toString(2));
         }
     }
 
     // GLOBAL LOAD: Load JSON devices to global list
     public static void loadConnectionToGlobalList() throws Exception {
-        File file = new File(DeviceRegistry.getPath(),"devices.json");
-
-        if (DeviceRegistry.getPath()== null){
-            System.out.println("path empty");
+        File file = getDeviceFile();
+        if (!file.exists()) {
+            System.out.println("No devices.json found");
+            DeviceRegistry.devices.clear();
             return;
         }
 
         StringBuilder json = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            System.out.println(DeviceRegistry.getPath());
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 json.append(line);
@@ -84,7 +91,7 @@ public class DeviceJsonUtil {
 
         JSONArray arr = new JSONArray(json.toString());
         List<Device> devices = DeviceRegistry.devices;
-        devices.clear(); // clear previous data
+        devices.clear();
 
         for (int i = 0; i < arr.length(); i++) {
             JSONObject obj = arr.getJSONObject(i);
@@ -92,46 +99,46 @@ public class DeviceJsonUtil {
                     obj.getString("name"),
                     obj.getString("ip"),
                     obj.getInt("port"),
-                    obj.optString("type"),
-                    obj.getBoolean("isActive")
-
+                    obj.optString("type", "tcp"),
+                    obj.optBoolean("isActive", false)
             ));
         }
     }
 
-//    update the device
+    // UPDATE: update the device
     public static boolean updateConnection(Device updatedDevice) throws IOException {
         List<Device> devices = loadConnection();
         boolean found = false;
 
         for (int i = 0; i < devices.size(); i++) {
-            Device d = devices.get(i);
-            if (d.name.equals(updatedDevice.name)) {
-                devices.set(i, updatedDevice);  // Replace old with updated
+            if (devices.get(i).name.equals(updatedDevice.name)) {
+                devices.set(i, updatedDevice);
                 found = true;
                 break;
             }
         }
-
         if (found) {
-            saveAll(devices);  // Write updated list
+            saveAll(devices);
         }
-
-        return found;  // true if updated, false if not found
+        return found;
     }
 
-//    delete a device
-
+    // DELETE: remove device by name
     public static boolean deleteConnectionByName(String name) throws IOException {
         List<Device> devices = loadConnection();
-        boolean removed = devices.removeIf(d -> d.name.equals(name));  // Remove matching
+        boolean removed = devices.removeIf(d -> d.name.equals(name));
 
         if (removed) {
-            saveAll(devices);  // Rewrite file with filtered list
+            saveAll(devices);
         }
-
-        return removed;  // true if something was deleted
+        return removed;
     }
 
-
+    // Resolve file location
+    private static File getDeviceFile() {
+        if (DeviceRegistry.getPath() != null) {
+            return new File(DeviceRegistry.getPath(), "devices.json");
+        }
+        throw new IllegalStateException("DeviceRegistry path is not set");
+    }
 }

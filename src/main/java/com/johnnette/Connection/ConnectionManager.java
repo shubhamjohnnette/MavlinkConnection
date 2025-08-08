@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.johnnette.MavlinkManager.GlobalVariables;
 import com.johnnette.MavlinkManager.MavlinkManager;
 import com.johnnette.savedConnection.Device;
+import com.johnnette.savedConnection.DeviceJsonUtil;
 import io.dronefleet.mavlink.*;
 
 public class ConnectionManager {

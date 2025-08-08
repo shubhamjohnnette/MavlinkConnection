@@ -14,6 +14,12 @@ import java.util.List;
 
 public class UserService {
     public static void autoConnect(){
+        try{
+            DeviceJsonUtil.loadConnectionToGlobalList();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         ConnectionManager manager = new ConnectionManager();
         manager.autoConnect();
 
@@ -58,7 +64,9 @@ public class UserService {
         }
 
     }
-
+    public static MavlinkManager MavManager(){
+        return MavlinkManager.getInstance();
+    }
     public static List<Device> getConnectionList()
     {
         return DeviceRegistry.devices;
